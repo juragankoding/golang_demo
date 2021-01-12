@@ -2,6 +2,10 @@
 
 package model
 
+type Message struct {
+	Message string `json:"Message"`
+}
+
 type NewTodo struct {
 	Text string `json:"text"`
 }

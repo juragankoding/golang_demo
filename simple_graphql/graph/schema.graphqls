@@ -11,6 +11,7 @@ type Todo {
 type Query {
   todos: [Todo!]!
   status: Message!
+  singleTodo(id: String!): Todo!
 }
 
 input NewTodo {

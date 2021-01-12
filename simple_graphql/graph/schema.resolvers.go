@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 
-	"github.com/juragankoding/simple_graphql/domain"
 	"github.com/juragankoding/simple_graphql/graph/generated"
 	"github.com/juragankoding/simple_graphql/graph/model"
 )
@@ -19,7 +18,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 	return r.ServiceTodo.AddTodo(todoInput)
 }
 
-func (r *mutationResolver) UdpateStatusTodo(ctx context.Context, id string) (*domain.Message, error) {
+func (r *mutationResolver) UdpateStatusTodo(ctx context.Context, id string) (*model.Message, error) {
 	todo, err := r.ServiceTodo.GetTodo(id)
 
 	if err != nil {
@@ -34,7 +33,7 @@ func (r *mutationResolver) UdpateStatusTodo(ctx context.Context, id string) (*do
 		return nil, err
 	}
 
-	return &domain.Message{
+	return &model.Message{
 		Message: "Success",
 	}, nil
 }
@@ -54,11 +53,11 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, input model.UpdateTod
 	}
 }
 
-func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (*domain.Message, error) {
+func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (*model.Message, error) {
 	if err := r.ServiceTodo.DeleteTodo(id); err != nil {
 		return nil, err
 	} else {
-		return &domain.Message{
+		return &model.Message{
 			Message: "Delete success",
 		}, nil
 	}
@@ -68,10 +67,14 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	return r.ServiceTodo.ListTodo()
 }
 
-func (r *queryResolver) Status(ctx context.Context) (*domain.Message, error) {
-	return &domain.Message{
+func (r *queryResolver) Status(ctx context.Context) (*model.Message, error) {
+	return &model.Message{
 		Message: "this is demo of graphql on golang",
 	}, nil
+}
+
+func (r *queryResolver) SingleTodo(ctx context.Context, id string) (*model.Todo, error) {
+	return r.ServiceTodo.GetTodo(id)
 }
 
 // Mutation returns generated.MutationResolver implementation.

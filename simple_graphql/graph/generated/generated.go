@@ -12,7 +12,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/juragankoding/simple_graphql/domain"
 	"github.com/juragankoding/simple_graphql/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -56,8 +55,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Status func(childComplexity int) int
-		Todos  func(childComplexity int) int
+		SingleTodo func(childComplexity int, id string) int
+		Status     func(childComplexity int) int
+		Todos      func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -69,13 +69,14 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error)
-	UdpateStatusTodo(ctx context.Context, id string) (*domain.Message, error)
+	UdpateStatusTodo(ctx context.Context, id string) (*model.Message, error)
 	UpdateTodo(ctx context.Context, input model.UpdateTodo) (*model.Todo, error)
-	DeleteTodo(ctx context.Context, id string) (*domain.Message, error)
+	DeleteTodo(ctx context.Context, id string) (*model.Message, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
-	Status(ctx context.Context) (*domain.Message, error)
+	Status(ctx context.Context) (*model.Message, error)
+	SingleTodo(ctx context.Context, id string) (*model.Todo, error)
 }
 
 type executableSchema struct {
@@ -147,6 +148,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateTodo(childComplexity, args["input"].(model.UpdateTodo)), true
+
+	case "Query.singleTodo":
+		if e.complexity.Query.SingleTodo == nil {
+			break
+		}
+
+		args, err := ec.field_Query_singleTodo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SingleTodo(childComplexity, args["id"].(string)), true
 
 	case "Query.status":
 		if e.complexity.Query.Status == nil {
@@ -260,6 +273,7 @@ type Todo {
 type Query {
   todos: [Todo!]!
   status: Message!
+  singleTodo(id: String!): Todo!
 }
 
 input NewTodo {
@@ -365,6 +379,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_singleTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -403,7 +432,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Message_Message(ctx context.Context, field graphql.CollectedField, obj *domain.Message) (ret graphql.Marshaler) {
+func (ec *executionContext) _Message_Message(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -517,9 +546,9 @@ func (ec *executionContext) _Mutation_udpateStatusTodo(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*domain.Message)
+	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋdomainᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -601,9 +630,9 @@ func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*domain.Message)
+	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋdomainᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -671,9 +700,51 @@ func (ec *executionContext) _Query_status(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*domain.Message)
+	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋdomainᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_singleTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_singleTodo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().SingleTodo(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Todo)
+	fc.Result = res
+	return ec.marshalNTodo2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2005,7 +2076,7 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 
 var messageImplementors = []string{"Message"}
 
-func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, obj *domain.Message) graphql.Marshaler {
+func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, obj *model.Message) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, messageImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -2114,6 +2185,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_status(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "singleTodo":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_singleTodo(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2446,11 +2531,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNMessage2githubᚗcomᚋjuragankodingᚋsimple_graphqlᚋdomainᚐMessage(ctx context.Context, sel ast.SelectionSet, v domain.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2githubᚗcomᚋjuragankodingᚋsimple_graphqlᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v model.Message) graphql.Marshaler {
 	return ec._Message(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋdomainᚐMessage(ctx context.Context, sel ast.SelectionSet, v *domain.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
