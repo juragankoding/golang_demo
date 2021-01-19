@@ -18,7 +18,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 	return r.ServiceTodo.AddTodo(todoInput)
 }
 
-func (r *mutationResolver) UdpateStatusTodo(ctx context.Context, id string) (*model.Message, error) {
+func (r *mutationResolver) UpdateStatusTodo(ctx context.Context, id string) (*model.Message, error) {
 	todo, err := r.ServiceTodo.GetTodo(id)
 
 	if err != nil {

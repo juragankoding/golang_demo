@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateTodo       func(childComplexity int, input model.NewTodo) int
 		DeleteTodo       func(childComplexity int, id string) int
-		UdpateStatusTodo func(childComplexity int, id string) int
+		UpdateStatusTodo func(childComplexity int, id string) int
 		UpdateTodo       func(childComplexity int, input model.UpdateTodo) int
 	}
 
@@ -69,7 +69,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error)
-	UdpateStatusTodo(ctx context.Context, id string) (*model.Message, error)
+	UpdateStatusTodo(ctx context.Context, id string) (*model.Message, error)
 	UpdateTodo(ctx context.Context, input model.UpdateTodo) (*model.Todo, error)
 	DeleteTodo(ctx context.Context, id string) (*model.Message, error)
 }
@@ -125,17 +125,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteTodo(childComplexity, args["id"].(string)), true
 
-	case "Mutation.udpateStatusTodo":
-		if e.complexity.Mutation.UdpateStatusTodo == nil {
+	case "Mutation.updateStatusTodo":
+		if e.complexity.Mutation.UpdateStatusTodo == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_udpateStatusTodo_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateStatusTodo_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UdpateStatusTodo(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.UpdateStatusTodo(childComplexity, args["id"].(string)), true
 
 	case "Mutation.updateTodo":
 		if e.complexity.Mutation.UpdateTodo == nil {
@@ -288,7 +288,7 @@ input UpdateTodo {
 
 type Mutation {
   createTodo(input: NewTodo!): Todo!
-  udpateStatusTodo(id: String!): Message!
+  updateStatusTodo(id: String!): Message!
   updateTodo(input: UpdateTodo!): Todo!
   deleteTodo(id: String!): Message!
 }
@@ -334,7 +334,7 @@ func (ec *executionContext) field_Mutation_deleteTodo_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_udpateStatusTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateStatusTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -509,7 +509,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	return ec.marshalNTodo2ᚖgithubᚗcomᚋjuragankodingᚋsimple_graphqlᚋgraphᚋmodelᚐTodo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_udpateStatusTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_updateStatusTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -526,7 +526,7 @@ func (ec *executionContext) _Mutation_udpateStatusTodo(ctx context.Context, fiel
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_udpateStatusTodo_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_updateStatusTodo_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -534,7 +534,7 @@ func (ec *executionContext) _Mutation_udpateStatusTodo(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UdpateStatusTodo(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().UpdateStatusTodo(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2121,8 +2121,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "udpateStatusTodo":
-			out.Values[i] = ec._Mutation_udpateStatusTodo(ctx, field)
+		case "updateStatusTodo":
+			out.Values[i] = ec._Mutation_updateStatusTodo(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

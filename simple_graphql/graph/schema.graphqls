@@ -26,7 +26,7 @@ input UpdateTodo {
 
 type Mutation {
   createTodo(input: NewTodo!): Todo!
-  udpateStatusTodo(id: String!): Message!
+  updateStatusTodo(id: String!): Message!
   updateTodo(input: UpdateTodo!): Todo!
   deleteTodo(id: String!): Message!
 }
