@@ -4,6 +4,7 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"fmt"
 	"context"
 
 	"github.com/juragankoding/simple_graphql/graph/generated"
@@ -15,6 +16,8 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 		Text: input.Text,
 	}
 
+	fmt.Println("create todo success");
+
 	return r.ServiceTodo.AddTodo(todoInput)
 }
 
@@ -22,6 +25,7 @@ func (r *mutationResolver) UdpateStatusTodo(ctx context.Context, id string) (*mo
 	todo, err := r.ServiceTodo.GetTodo(id)
 
 	if err != nil {
+		fmt.Printf("Failed Update status todo %s", err);
 		return nil, err
 	}
 
@@ -30,8 +34,11 @@ func (r *mutationResolver) UdpateStatusTodo(ctx context.Context, id string) (*mo
 	err = r.ServiceTodo.UpdateTodo(todo)
 
 	if err != nil {
+		fmt.Printf("Failed Update status todo %s", err);
 		return nil, err
 	}
+
+	fmt.Printf("Success to update todo status");
 
 	return &model.Message{
 		Message: "Success",
@@ -47,16 +54,24 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, input model.UpdateTod
 	err := r.ServiceTodo.UpdateTodo(todoInput)
 
 	if err != nil {
+		fmt.Printf("Failed to Update todo with id : %s", input.ID);
+
 		return nil, err
 	} else {
+		fmt.Printf("Todo success Update")
+
 		return todoInput, nil
 	}
 }
 
 func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (*model.Message, error) {
 	if err := r.ServiceTodo.DeleteTodo(id); err != nil {
+		fmt.Printf("delete Todo failed with id : %s", id);
+
 		return nil, err
 	} else {
+		fmt.Printf("Success to delete Todo with id : %s", id);
+
 		return &model.Message{
 			Message: "Delete success",
 		}, nil
